@@ -1,14 +1,12 @@
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 using TarefasBackEnd.Models;
 using TarefasBackEnd.Repositories;
 
 namespace TarefasBackEnd.Controllers
 {
-
+    [Authorize]
     [ApiController]
     [Route("tarefa")]
     public class TarefaController : ControllerBase
@@ -16,7 +14,8 @@ namespace TarefasBackEnd.Controllers
         [HttpGet]
         public IActionResult GET([FromServices] ITarefaReposity reposity) 
         {
-            var tarefas = reposity.Read();
+            var id = new Guid(User.Identity.Name);
+            var tarefas = reposity.Read(id);
             return Ok(tarefas);
         }
 
@@ -25,8 +24,10 @@ namespace TarefasBackEnd.Controllers
         {
             if (!ModelState.IsValid)
                 return BadRequest();
-            reposity.Create(model);
 
+            model.UsuarioId = new Guid(User.Identity.Name);
+
+            reposity.Create(model);
             return StatusCode(201);
         }
 
